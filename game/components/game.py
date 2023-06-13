@@ -36,6 +36,16 @@ class Game:
         user_input = pygame.key.get_pressed()
         self.player.update(user_input)
 
+        if self.player.x < 0:  # Si la nave sale por la izquierda
+            self.player.x = SCREEN_WIDTH  # La colocamos en el lado derecho
+        elif self.player.x > SCREEN_WIDTH:  # Si la nave sale por la derecha
+            self.player.x = 0  # La colocamos en el lado izquierdo
+
+        if self.player.y < 0:  # Si la nave intenta salir por arriba
+            self.player.y = 0  # La mantenemos en el borde superior
+        elif self.player.y > SCREEN_HEIGHT:  # Si la nave intenta salir por abajo
+            self.player.y = SCREEN_HEIGHT  # La mantenemos en el borde inferior
+
     def draw(self):
         self.clock.tick(FPS)
         self.screen.fill((255, 255, 255))
