@@ -1,4 +1,5 @@
 import pygame
+from game.components.enemies.enemy_manager import EnemyManager
 
 from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE
 from game.components.spaceship import Spaceship
@@ -15,6 +16,7 @@ class Game:
         self.x_pos_bg = 0
         self.y_pos_bg = 0
         self.player = Spaceship()
+        self.enemy_manager = EnemyManager()
 
 
     def run(self):
@@ -35,29 +37,14 @@ class Game:
     def update(self):
         user_input = pygame.key.get_pressed()
         self.player.update(user_input)
-
-        if user_input[pygame.K_UP]:
-           self.rect.y -= self.SHIP_SPEED
-           if self.rect.y < 0:
-              self.rect.y = 0
-        elif user_input[pygame.K_DOWN]:
-           self.rect.y += self.SHIP_SPEED
-           if self.rect.y > SCREEN_HEIGHT - self.SHIP_HEIGHT:
-                self.rect.y = SCREEN_HEIGHT - self.SHIP_HEIGHT
-
-        if user_input[pygame.K_LEFT]:
-            self.rect.x -= self.SHIP_SPEED
-        elif user_input[pygame.K_RIGHT]:
-             self.rect.x += self.SHIP_SPEED
-
-        if self.rect.x > SCREEN_WIDTH: self.SHIP_WIDTH                       
-        self.rect.x > - SCREEN_WIDTH: self.SHIP_WIDTH
+        self.enemy_manager.update()
 
     def draw(self):
         self.clock.tick(FPS)
         self.screen.fill((255, 255, 255))
         self.draw_background()
         self.player.draw(self.screen)
+        self.enemy_manager.draw(self.screen)
         pygame.display.update()
         #pygame.display.flip()
 
