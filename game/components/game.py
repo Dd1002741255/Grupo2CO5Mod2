@@ -36,15 +36,22 @@ class Game:
         user_input = pygame.key.get_pressed()
         self.player.update(user_input)
 
-        if self.player.x < 0:  # Si la nave sale por la izquierda
-            self.player.x = SCREEN_WIDTH  # La colocamos en el lado derecho
-        elif self.player.x > SCREEN_WIDTH:  # Si la nave sale por la derecha
-            self.player.x = 0  # La colocamos en el lado izquierdo
+        if user_input[pygame.K_UP]:
+           self.rect.y -= self.SHIP_SPEED
+           if self.rect.y < 0:
+              self.rect.y = 0
+        elif user_input[pygame.K_DOWN]:
+           self.rect.y += self.SHIP_SPEED
+           if self.rect.y > SCREEN_HEIGHT - self.SHIP_HEIGHT:
+                self.rect.y = SCREEN_HEIGHT - self.SHIP_HEIGHT
 
-        if self.player.y < 0:  # Si la nave intenta salir por arriba
-            self.player.y = 0  # La mantenemos en el borde superior
-        elif self.player.y > SCREEN_HEIGHT:  # Si la nave intenta salir por abajo
-            self.player.y = SCREEN_HEIGHT  # La mantenemos en el borde inferior
+        if user_input[pygame.K_LEFT]:
+            self.rect.x -= self.SHIP_SPEED
+        elif user_input[pygame.K_RIGHT]:
+             self.rect.x += self.SHIP_SPEED
+
+        if self.rect.x > SCREEN_WIDTH: self.SHIP_WIDTH                       
+        self.rect.x > - SCREEN_WIDTH: self.SHIP_WIDTH
 
     def draw(self):
         self.clock.tick(FPS)
