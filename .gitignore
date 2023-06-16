@@ -1,0 +1,40 @@
+# Byte-compiled / optimized Python files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# macOS files
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Compiled files
+*.exe
+*.dll
+*.pyd
+*.pyo
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Other
+*.pyc
+*.bak
