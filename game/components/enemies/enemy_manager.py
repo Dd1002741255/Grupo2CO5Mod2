@@ -13,7 +13,7 @@ class EnemyManager:
 
     def draw (self, screen):
         for enemy in self.enemies:
-            enemy.draw(screen)
+            enemy.draw(screen, exploding=False)
 
     def add_enemy(self):
         enemy_type = random.randint(1,2)
@@ -25,7 +25,7 @@ class EnemyManager:
             move_x_for = [50, 120]
             enemy = Enemy(enemy_type, x_speed, y_speed, move_x_for)
 
-        if len(self.enemies) < 1:
+        if len(self.enemies) < 3: #TODO: get all the enemies shooting
             self.enemies.append(enemy)
     
     def reset(self):

@@ -1,5 +1,5 @@
 import pygame
-
+import time
 
 class BulletManager:
     def __init__(self):
@@ -10,10 +10,14 @@ class BulletManager:
 
         for bullet in self.bullets:
             bullet.update(self.bullets)
-
+            clock = pygame.time.Clock()
             for enemy in game.enemy_manager.enemies:
                 if bullet.rect.colliderect(enemy.rect) and bullet.owner == 'player':
                     game.score += 100
+                    print("exploted enemy")
+                    enemy.draw(game.screen, exploding=True)
+                    pygame.display.flip() 
+                    time.sleep(0.2)
                     game.enemy_manager.enemies.remove(enemy)
                     self.bullets.remove(bullet)
 
