@@ -1,6 +1,7 @@
 import pygame
 from game.components.bullets.bullet_manager import BulletManager
 from game.components.enemies.enemy_manager import EnemyManager
+from game.components.power_ups.power_up_manager import PowerUpManager
 from game.components.menu import Menu
 #agregado el importe
 import time
@@ -15,7 +16,8 @@ class Game:
         pygame.display.set_caption(TITLE)
         pygame.display.set_icon(ICON)
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.screen.fill((0, 255, 255)) 
+        self.screen.fill((0, 255, 255))
+        self.limit = 3
         self.clock = pygame.time.Clock()
         self.playing = False
         self.running = False
@@ -27,10 +29,13 @@ class Game:
         self.bullet_manager = BulletManager()
         self.death_count = 0
         self.score = 0
-        self.menu = Menu('Press Any Key to start...', self.screen)
+        self.selected = 0
+        self.menu = Menu('PRESIONA ENTER PARA EMPEZAR...', self.screen)
+        self.power_up_manager = PowerUpManager()
         self.max_score = 0
         self.start_sound = pygame.mixer.Sound(START_SOUND)
         self.last_score_increase = time.time()
+        self.selected_difficulty = False
 
 
     def execute(self):
@@ -50,6 +55,7 @@ class Game:
         self.bullet_manager.reset()
         self.enemy_manager.reset()
         self.playing = True
+        self.player.lifes_account = 1
 
         # Cargar y reproducir el sonido de inicio
         self.start_sound.play()
@@ -77,8 +83,10 @@ class Game:
             self.last_score_increase = current_time
         user_input = pygame.key.get_pressed()
         self.player.update(user_input, self)
-        self.enemy_manager.update(self)
         self.bullet_manager.update(self)
+        self.power_up_manager.update(self)
+        self.enemy_manager.update(self)
+
 
     def draw(self):
         self.clock.tick(FPS)
@@ -87,9 +95,13 @@ class Game:
         self.player.draw(self.screen)
         self.enemy_manager.draw(self.screen)
         self.bullet_manager.draw(self.screen)
+        self.draw_life()
+        self.power_up_manager.draw(self.screen)
+
         self.draw_score()
+        self.draw_power_up_time()
+
         pygame.display.update()
-        #pygame.display.flip()
 
     def draw_background(self):
         image = pygame.transform.scale(BG, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -104,62 +116,44 @@ class Game:
 
     
     def show_finalscreen(self):
-        half_screen_width = SCREEN_WIDTH // 2
-        half_screen_height = SCREEN_HEIGHT // 2
-
-        self.menu.reset_screen_color(self.screen)
         self.check_max_score()
-        if self.played_alredy():
-            
-            message = "Puntuaciones\n" \
-                    f"Muertes: {self.death_count}\n" \
-                    f"Puntuación: {self.score}\n" \
-                    f"Maxima puntuación: {self.max_score}\n"
-            font = pygame.font.Font(FONT_STYLE, 30)
-            text_surface = self.render_multiline_text(font, message, (0, 0, 0), 400)
-
-            pygame.display.set_caption(message)
-
-            icon = pygame.transform.scale(GAME_OVER, (400, 150))
-            self.screen.blit(icon, (half_screen_width - 200, half_screen_height - 200))
-            self.screen.blit(text_surface, ((SCREEN_WIDTH - text_surface.get_width()) // 2, half_screen_height + 50))
-
-        self.menu.draw(self.screen)
+        self.menu.draw(self.death_count, self.score, self.max_score, self.screen, self.selected_difficulty,  self)
         self.menu.update(self)
-    
-    #if we haze played alredy we will show the score
-    def played_alredy(self):
-        return self.death_count > 0
     
     def check_max_score(self):
         if self.score > self.max_score:
             self.max_score = self.score
     
-    def render_multiline_text(self, font, text, color, max_line_width):
-        lines = text.split('\n')
-        rendered_lines = []
-
-        for line in lines:
-            rendered_line = font.render(line, True, color)
-            rendered_lines.append(rendered_line)
-
-        max_line_height = max(rendered_line.get_height() for rendered_line in rendered_lines)
-        text_surface = pygame.Surface((max_line_width, max_line_height * len(rendered_lines)), pygame.SRCALPHA)
-
-        current_y = 0
-        for rendered_line in rendered_lines:
-            text_surface.blit(rendered_line, ((max_line_width - rendered_line.get_width()) // 2, current_y))
-            current_y += max_line_height
-
-        return text_surface
-    
-    
     def update_score(self):
         self.score += 1
+    
+    def draw_power_up_time(self):
+        if self.player.has_power_up:
+            time_to_show = round((self.player.power_time_up - pygame.time.get_ticks())/1000, 2)
+
+            if time_to_show >=0:
+                font = pygame.font.Font(FONT_STYLE, 30)
+                text = font.render(f'{self.player.power_up_type.capitalize()} is enabled for {time_to_show} seconds', True, (255,255,255))
+                #text_rect = text.get_rect()
+                self.screen.blit(text,(540, 50))
+            else:
+                self.player_has_power_up = False
+                self.player.power_up_type = DEFAULT_TYPE
+                self.player.set_image()
+    
     
     def draw_score(self):
         font = pygame.font.Font(FONT_STYLE, 30)
         text = font.render(f'Score: {self.score}', True, (255,255,255))
         text_rect = text.get_rect()
         text_rect.center = (100, 100)
-        self.screen.blit(text, text_rect)
+        self.screen.blit(text, text_rect) 
+        
+        
+        
+    def draw_life(self):
+        font = pygame.font.Font(FONT_STYLE, 30)
+        text = font.render(f'Lives: {self.player.lifes_account}', True, (255,255,255))
+        text_rect = text.get_rect()
+        text_rect.center = (100, 50)
+        self.screen.blit(text, text_rect) 

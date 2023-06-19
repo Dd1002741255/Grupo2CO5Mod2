@@ -2,7 +2,7 @@ import random
 import pygame
 from pygame.sprite import Sprite
 from game.components.bullets.bullet import Bullet
-from game.utils.constants import ENEMY_1, ENEMY_2, SCREEN_HEIGHT, SCREEN_WIDTH, EXPLOSION, FPS
+from game.utils.constants import ENEMY_1, ENEMY_2,ENEMY_3, ENEMY_4,SCREEN_HEIGHT, SCREEN_WIDTH, EXPLOSION, FPS, EXPLOSION1, EXPLOSION3
 
 class Enemy(Sprite):
     SHIP_WIDTH = 40
@@ -12,7 +12,7 @@ class Enemy(Sprite):
     SPEED_Y = 1
     SPEED_X = 5
     MOV_X = {0: 'left', 1: 'right'}
-    IMAGE = {1: ENEMY_1, 2: ENEMY_2}
+    IMAGE = {1: ENEMY_1, 2: ENEMY_2, 3: ENEMY_3, 4: ENEMY_4}
     SHOOT_INTERVAL = (30, 50)
 
     shooting_time = 0  # Variable de clase para el tiempo de disparo
@@ -22,6 +22,8 @@ class Enemy(Sprite):
         self.image = pygame.transform.scale(self.image, (self.SHIP_WIDTH, self.SHIP_HEIGHT))
         # create a tribute explotion
         self.explosion = pygame.transform.scale(EXPLOSION, (self.SHIP_WIDTH, self.SHIP_HEIGHT))
+        self.explosion_array = [EXPLOSION, EXPLOSION1, EXPLOSION3]
+        self.explosion_img = []
         self.explosion_index = 0
         self.rect = self.image.get_rect()
         self.rect.y = self.Y_POS
@@ -32,6 +34,16 @@ class Enemy(Sprite):
         self.move_x_for = random.randint(move_x_for[0], move_x_for[1])
         self.index = 0
         self.type = 'enemy'
+    
+    def add_images(self, image):
+        for image in self.explosion_array:
+            self.explosion_img.pygame.transform.scale(image, (self.SHIP_WIDTH, self.SHIP_HEIGHT))
+
+
+    def updateImg(self):
+        for image in self.explosion_img:
+            self.explosion = image
+
 
     def update(self, ships, game):
         self.rect.y += self.speed_y
@@ -69,3 +81,14 @@ class Enemy(Sprite):
             bullet = Bullet(self)
             bullet_Manager.add_bullet(bullet)
             self.shooting_time = current_time + random.randint(*self.SHOOT_INTERVAL)
+            self.shooting_time = current_time + random.randint(*self.SHOOT_INTERVAL)
+
+    def animate_explosion(self, game, screen):
+        self.explosion_index += 1
+        if self.explosion_index >= FPS * 0.002:  # Explosion animation duration (0.3 seconds)
+            self.updateImg()
+            game.enemy_manager.enemies.remove(self)
+            
+        else:
+            screen.blit(self.explosion, (self.rect.x, self.rect.y))
+            

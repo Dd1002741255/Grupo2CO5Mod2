@@ -1,10 +1,13 @@
 import pygame
 import time
+from game.utils.constants import SHIELD_TYPE, DEAD_SOUND
 
 class BulletManager:
     def __init__(self):
         self.bullets = []
         self.enemy_bullets = []
+        self.dead_sound = pygame.mixer.Sound(DEAD_SOUND)
+        self.dead_sound.set_volume(0.3)
 
     def update (self, game):
 
@@ -14,7 +17,6 @@ class BulletManager:
             for enemy in game.enemy_manager.enemies:
                 if bullet.rect.colliderect(enemy.rect) and bullet.owner == 'player':
                     game.score += 100
-                    print("exploted enemy")
                     enemy.draw(game.screen, exploding=True)
                     pygame.display.flip() 
                     time.sleep(0.2)
@@ -25,11 +27,17 @@ class BulletManager:
             bullet.update(self.enemy_bullets)
 
             if bullet.rect.colliderect(game.player.rect) and bullet.owner == 'enemy':
-                game.death_count += 1
+                if game.player.power_up_type != SHIELD_TYPE:
+                    game.player.add_lifes(-1)
+                    if game.player.lifes_account <= 0 :
+                        self.dead_sound.play()
+                        game.death_count += 1
+                        self.enemy_bullets.remove(bullet)
+                        game.playing = False
+                        pygame.time.delay(1000)
+                        break
                 self.enemy_bullets.remove(bullet)
-                game.playing = False
-                pygame.time.delay(1000)
-                break
+            
 
     def draw (self, screen):
         for bullet in self.bullets:
